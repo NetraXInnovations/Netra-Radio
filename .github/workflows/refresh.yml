@@ -1,4 +1,4 @@
-name: Refresh Radio, eBooks and Audio Books lists
+name: Refresh Netra Radio stations
 
 on:
   schedule:

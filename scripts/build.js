@@ -1,14 +1,13 @@
 'use strict';
 
-// Builds the JSON files the Netra Plus app reads for Radio, eBooks and Audio Books.
+// Builds the JSON files the Netra Plus app reads for Netra Radio.
+// (eBooks and Audio Books are not stored here: the app asks Internet Archive directly.)
 // No server: GitHub Actions runs this every day for free and commits the files; the app reads
 // them through jsDelivr (or GitHub raw). Run by hand with:  node scripts/build.js
 //
 // Output (all under data/):
 //   catalog.json                      languages, categories, on/off switches, news languages
 //   radio/<language>/<category>.json  first 40 stations   { stations, offset, hasMore }
-//   ebooks/<language>/<category>.json first 30 books      { books, page, total, hasMore }
-//   audio/<language>/<category>.json  first 30 audio books { books, page, total, hasMore }
 //
 // A list that cannot be fetched today keeps yesterday's file, so a provider outage never empties the app.
 
@@ -91,12 +90,6 @@ async function main() {
   for (const language of s.languages) {
     if (s.radioEnabled) for (const category of s.radioCategories) {
       jobs.push({ file: `radio/${language.id}/${category.id}.json`, load: () => src.radioStations({ language, category, query: '', offset: 0 }) });
-    }
-    if (s.ebooksEnabled) for (const category of s.bookCategories) {
-      jobs.push({ file: `ebooks/${language.id}/${category.id}.json`, load: () => src.searchBooks({ language, category, query: '', page: 1 }) });
-    }
-    if (s.audioEnabled) for (const category of s.audioCategories) {
-      jobs.push({ file: `audio/${language.id}/${category.id}.json`, load: () => src.searchAudioBooks({ language, category, query: '', page: 1 }) });
     }
   }
   const { ok, failed } = await runAll(jobs);
